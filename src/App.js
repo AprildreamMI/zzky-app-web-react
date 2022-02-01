@@ -1,13 +1,12 @@
-import { Button } from 'antd';
+import { useRoutes } from 'react-router-dom';
+import routers from './router/index';
 
 function App() {
+  const routersElement = useRoutes(routers)
   return (
-    <div className="App">
-      <Button type="primary">按钮</Button>
-      <div className=' tw-flex tw-text-[30px] tw-font-bold tw-text-primary'>
-        棕色的狐狸
-      </div>
-    </div>
+    <>
+      { routersElement }
+    </>
   );
 }
 
