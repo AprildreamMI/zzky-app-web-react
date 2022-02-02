@@ -1,4 +1,9 @@
 @import './tailwind.scss';
+@import url('//at.alicdn.com/t/font_2917743_255h2sxth2nh.css');
+
+body, html {
+  height: 100%;
+}
 
 #root {
   width: 100%;

@@ -1,0 +1,35 @@
+
+.index_header {
+  height: 60px;
+  padding: 0 40px 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  &_img {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+  }
+  &_title {
+    line-height: 28px;
+  }
+  &_btn {
+    min-width: 100px;
+    height: 32px;
+    padding: 0 10px;
+    margin-left: 10px;
+    border-radius: 2px;
+    color: #606266;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+      cursor: pointer;
+      background-color: rgba($color: #393C44, $alpha: .1);
+    }
+    & > i {
+      margin-right: 8px;
+    }
+  }
+}
