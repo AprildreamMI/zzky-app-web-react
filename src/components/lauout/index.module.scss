@@ -1,0 +1,8 @@
+.layout {
+  height: 100%;
+  overflow: hidden;
+  &_body {
+    background-color: #F3F3F3;
+    height: calc(100% - 120px);
+  }
+}

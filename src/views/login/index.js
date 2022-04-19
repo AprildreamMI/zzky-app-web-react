@@ -1,33 +1,23 @@
 import { Form, Input, Button, Checkbox, message } from 'antd'
-import styles from './index.module.scss'
-import IndexHeader from "@/components/indexHeader"
-import * as apis from '@/api/index'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { SHA256 } from 'crypto-js'
 import { Base64 } from 'js-base64'
+
+import * as apis from '@/api/index'
+import useForm from './useForm'
+import styles from './index.module.scss'
+import LayoutHeader from "@/components/layout/header"
+import { useDispatch } from 'react-redux'
+import { setUserInfo } from '@/store/slices/mainSlice'
 
 // 接口地址
 const baseUrl = process.env.REACT_APP_API_BASE_URL
 function Login () {
+  const dispatch = useDispatch()
   // 按钮loading
   const [btnLoading, setBtnLoading] = useState(false)
-  // 预填充表单
-  const [form, setForm] = useState({})
-
-  // 挂载则读取缓存表单
-  useEffect(() => {
-    getPw()
-  }, [])
-  const getPw = () => {
-    let account = localStorage.getItem('account')
-    let password = localStorage.getItem('password')
-    account = account ? Base64.decode(account) : ''
-    password = password ? Base64.decode(password) : ''
-    setForm({
-      account,
-      password
-    })
-  }
+  // 读取缓存的表单值
+  const form = useForm()
 
   // 表单完成提交
   const onFinish = (values) => {
@@ -35,12 +25,10 @@ function Login () {
   }
   /**
    * 登录
-   *  管理员: wdkfy
+   *  管理员: wdkfy\admin001
       项目负责人: 人事号（8位字母+数字）
       院系审核人、校级审核人：管理员设置的用户名（见tapd文档）
       专家: 手机号（11位数字，判断合不合法）
-      除管理员外使用统一默认密码
-      管理员密码: admin001
       默认密码: zzky123456:（同时包含数字和字母（字母区分大小写）6-16位）
     */
   const loginByPassword = (values) => {
@@ -57,7 +45,8 @@ function Login () {
       if (res.data.code === 0) {
         const { token, user } = res.data.data
         localStorage.setItem('token', token)
-        console.log(user)
+        // 设置用户信息
+        dispatch(setUserInfo(user))
       } else {
         message.error(res.data.message)
       }
@@ -78,10 +67,10 @@ function Login () {
   }
   return (
     <div className={styles.login}>
-      <IndexHeader
+      <LayoutHeader
         editDisabled
         exitDisabled>
-      </IndexHeader>
+      </LayoutHeader>
       <div className={styles.login_main}>
         <div className={styles.form_wrapper}>
           <p className=" tw-font-bold tw-text-[#909399] tw-text-[16px] tw-leading-[30px]">欢迎登录</p>

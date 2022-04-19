@@ -1,32 +1,28 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const mainSlice = createSlice({
-  name: 'mainSlice',
+  name: 'main',
   initialState: {
-    count: 0
+    userInfo: {}
   },
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    // 增加
-    increment: (state) => {
-      state.count += 1
-    },
-    // 减少
-    decrement: (state) => {
-      state.count -= 1
-    },
-    // 赋值
-    incrementByAmount: (state, action) => {
-      state.count += action.payload
+    /**
+     * 设置用户信息
+     * @param {*} state 
+     * @param {*} action 
+     */
+    setUserInfo: (state, action) => {
+      state.userInfo = action.payload
     }
   }
 })
 
 // action 函数
-export const { increment, decrement, incrementByAmount } = mainSlice.actions
-// 获取count
-export const selectCount = (state) => {
-  return state.mainSlice.count
+export const { setUserInfo } = mainSlice.actions
+// 获取用户信息
+export const userInfo = (state) => {
+  return state.main.userInfo
 }
 
 // 导出reducer

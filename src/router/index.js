@@ -8,7 +8,7 @@ const routers = [
   },
   {
     path: "*",
-    element: <Navigate to="/login" replace={true} />
+    element: <Navigate to="/" replace={true} />
   },
 ]
 

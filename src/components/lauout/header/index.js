@@ -4,7 +4,7 @@ import logo from '@/assets/images/logo.png'
 
 const cbs = classnames.bind(styles)
 
-function IndexHeader ({ editDisabled, exitDisabled }) {
+function LayoutHeader ({ editDisabled, exitDisabled }) {
   const ditPassword = () => {
     console.log('修改密码')
   }
@@ -40,4 +40,4 @@ function IndexHeader ({ editDisabled, exitDisabled }) {
   )
 }
 
-export default IndexHeader
+export default LayoutHeader
