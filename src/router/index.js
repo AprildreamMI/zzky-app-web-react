@@ -1,10 +1,26 @@
+import { createElement, lazy } from 'react'
 import { Navigate } from 'react-router-dom'
-import Login from '../views/login'
 
 const routers = [
   {
-    path: "/login",
-    element: <Login />
+    path: '/login',
+    element: createElement(lazy(() => import('../views/login')))
+  },
+  {
+    path: '/',
+    element: (() => {
+      const token = localStorage.getItem('token')
+      if (token) {
+        return createElement(lazy(() => import('../components/layout')))
+      }
+      return <Navigate to="/login" replace={true} />
+    })(),
+    // children: [
+    //   {
+    //     path: '/admin',
+    //     // element: createElement(lazy(() => import('../components/layout')))
+    //   }
+    // ]
   },
   {
     path: "*",

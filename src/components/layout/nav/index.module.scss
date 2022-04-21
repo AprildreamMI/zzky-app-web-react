@@ -1,0 +1,23 @@
+.layout_nav {
+  height: 60px;
+  background-color: #393C44;
+  &_list {
+    width: 1280px;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+  }
+  .nav_item {
+    height: 56px;
+    padding: 15px 18px 0 18px;
+    margin-right: 2px;
+    color: rgba($color: #fff, $alpha: 0.8);
+    border-radius: 4px 4px 0 0;
+    &:hover, &.active {
+      cursor: pointer;
+      color: #fff;
+      background-color: rgba($color: #fff, $alpha: 0.1);
+    }
+  }
+}
