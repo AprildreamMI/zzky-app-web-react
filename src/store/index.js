@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import mainSlice from './slices/mainSlice';
+import mainReducer from './slices/mainSlice';
 
 // 创建store
 const store = configureStore({
   reducer: {
-    mainSlice: mainSlice
+    main: mainReducer
   }
 })
 

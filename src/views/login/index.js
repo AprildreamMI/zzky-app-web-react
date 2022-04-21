@@ -9,10 +9,12 @@ import styles from './index.module.scss'
 import LayoutHeader from "@/components/layout/header"
 import { useDispatch } from 'react-redux'
 import { setUserInfo } from '@/store/slices/mainSlice'
+import { useNavigate } from 'react-router-dom'
 
 // 接口地址
 const baseUrl = process.env.REACT_APP_API_BASE_URL
 function Login () {
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   // 按钮loading
   const [btnLoading, setBtnLoading] = useState(false)
@@ -47,6 +49,9 @@ function Login () {
         localStorage.setItem('token', token)
         // 设置用户信息
         dispatch(setUserInfo(user))
+
+        // 跳转首页
+        navigate('/')
       } else {
         message.error(res.data.message)
       }

@@ -1,12 +1,16 @@
 import { USER_ROLE } from '@/configs/index'
-import { useState } from 'react'
+import { selectUserRole } from '@/store/slices/mainSlice'
+import { Suspense } from 'react'
+import { useSelector } from 'react-redux'
+import { Outlet } from 'react-router-dom'
+import PageSpin from '../pageSpin'
 import LayoutHeader from './header'
 import styles from './index.module.scss'
 import LayoutNav from './nav'
 
 function Layout () {
-  // 用户角色
-  const [userRole] = useState(USER_ROLE.ADMIN)
+  const userRole = useSelector(selectUserRole)
+
   // 是否可以修改密码
   const editDisabled = {
     [USER_ROLE.ADMIN]: true,
@@ -64,7 +68,9 @@ function Layout () {
         navs={navs}>
       </LayoutNav>
       <div className={styles.layout_body}>
-        aa
+        <Suspense fallback={<PageSpin />}>
+          <Outlet></Outlet>
+        </Suspense>
       </div>
     </div>
   )
