@@ -27,7 +27,7 @@ function Login () {
   }
   /**
    * 登录
-   *  管理员: wdkfy\admin001
+   *  管理员: wdkfy\admin001\Kfyxmc3977
       项目负责人: 人事号（8位字母+数字）
       院系审核人、校级审核人：管理员设置的用户名（见tapd文档）
       专家: 手机号（11位数字，判断合不合法）
@@ -44,22 +44,24 @@ function Login () {
       ...values,
       password: SHA256(password).toString()
     }).then(res => {
+      setBtnLoading(false)
       if (res.data.code === 0) {
         const { token, user } = res.data.data
         localStorage.setItem('token', token)
         // 设置用户信息
         dispatch(setUserInfo(user))
-
         // 跳转首页
         navigate('/')
       } else {
         message.error(res.data.message)
       }
     }).catch(err => {
+      setBtnLoading(false)
       console.log(err)
       message.error('请求出错')
     }).finally(() => {
-      setBtnLoading(false)
+      // 不能在这里设置btn 否则报错 在组件卸载后仍然设置了state,会造成内存泄漏
+      // setBtnLoading(false)
     })
   }
   // 设置密码

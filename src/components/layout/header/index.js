@@ -1,15 +1,23 @@
 import classnames from 'classnames'
 import styles from './index.module.scss'
 import logo from '@/assets/images/logo.png'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { setUserInfo } from '@/store/slices/mainSlice'
 
 const cbs = classnames.bind(styles)
 
 function LayoutHeader ({ editDisabled, exitDisabled }) {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  
   const ditPassword = () => {
     console.log('修改密码')
   }
   const logOut = () => {
-    console.log('退出')
+    navigate('/login')
+    localStorage.removeItem('token')
+    dispatch(setUserInfo({}))
   }
   return (
     <div className={styles.layout_header}>

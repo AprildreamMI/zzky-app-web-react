@@ -1,0 +1,33 @@
+.content {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  &_header {
+    height: 60px;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    color: var(--color-primary);
+  }
+  &_body {
+    flex: 1;
+    overflow: auto;
+    &_title {
+      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+    }
+    &_main {
+      padding: 20px 40px;
+    }
+  }
+  &_footer {
+    height: 60px;
+    padding: 0 40px;
+    border-top: 1px solid var(--border-color-base);
+    display: flex;
+    align-items: center;
+  }
+}

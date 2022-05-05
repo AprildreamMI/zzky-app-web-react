@@ -4,7 +4,7 @@ import styles from './index.module.scss'
 import Icon1 from '../../assets/images/header-icons/icon1.png'
 import Icon2 from '../../assets/images/header-icons/icon2.png'
 import Icon3 from '../../assets/images/header-icons/icon3.png'
-import { useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 const cbs = classNames.bind(styles)
 function BaseLayout ({
   hideLeft,
@@ -48,7 +48,7 @@ function BaseLayout ({
                 return (
                   <div
                     key={item.path}
-                    className={cbs({[styles.active]: isActive()}, styles.nav_item)}
+                    className={cbs({[styles.active]: isActive(item.path)}, styles.nav_item)}
                     onClick={() => linkTo(item.path)}>
                     <p className="tw-font-bold tw-text-[14px]">
                       {item.label}
@@ -60,6 +60,7 @@ function BaseLayout ({
           </div>
         </div>
       }
+      <Outlet></Outlet>
     </div>
   )
 }
