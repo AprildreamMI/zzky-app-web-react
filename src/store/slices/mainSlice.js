@@ -4,6 +4,7 @@ const userInfoJsonStr = localStorage.getItem('userInfo')
 const mainSlice = createSlice({
   name: 'main',
   initialState: {
+    // 用户信息
     userInfo: userInfoJsonStr && userInfoJsonStr !== 'undefined' ? JSON.parse(userInfoJsonStr) : {}
   },
   // The `reducers` field lets us define reducers and generate associated actions

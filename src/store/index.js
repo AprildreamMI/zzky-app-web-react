@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import mainReducer from './slices/mainSlice';
+import downListReducer from './slices/downListSlice';
 
 // 创建store
 const store = configureStore({
   reducer: {
-    main: mainReducer
+    main: mainReducer,
+    downList: downListReducer
   }
 })
 
