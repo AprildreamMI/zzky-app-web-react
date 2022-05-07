@@ -5,8 +5,12 @@ import { Fragment, useCallback, useEffect, useState } from "react"
 import { useSelector } from "react-redux";
 import * as apis from '@/api'
 import { USER_ROLE } from "@/configs";
+import { downloadFileByA } from "@/utils";
+import AccountDialog from './account-dialog/index'
 
 function Project () {
+  // 添加及编辑账号dialog
+  const [accountDialogVisible, setAccountDialogVisible] = useState(false)
   // 下拉框数据
   const { college: facultyOptions } = useSelector(selectDownList)
   // 条件搜索表单
@@ -29,6 +33,8 @@ function Project () {
   })
   // 当前选择的行
   const [selectedRows, setSelectedRows] = useState([])
+  // 当前需要编辑用户的id
+  const [curUserId, setCurUserId] = useState('')
 
   // 搜索
   const onSearch = () => {
@@ -75,6 +81,12 @@ function Project () {
   useEffect(() => {
     getTableData()
   }, [getTableData])
+
+  // 下载导入模板
+  const onDownloadTemplate = () => {
+    const baseUrl = process.env.REACT_APP_API_BASE_URL
+    downloadFileByA(baseUrl + 'api/v1/static/download/project_account_tpl', '')
+  }
   
   return (
     <BaseLayoutContent
@@ -120,11 +132,13 @@ function Project () {
         <div>
           <Button
             className="tw-mr-[10px]"
-            type="primary">
+            type="primary"
+            onClick={() => setAccountDialogVisible(true)}>
             新增
           </Button>
           <Button
-            className="tw-mr-[10px]">
+            className="tw-mr-[10px]"
+            onClick={onDownloadTemplate}>
             下载批量导入模板
           </Button>
           <Button
@@ -183,11 +197,25 @@ function Project () {
             render={(text, record) => (
               <>
                 <Button type="text" danger>禁用</Button>
-                <Button type="text">编辑</Button>
+                <Button type="text" onClick={() => {
+                  console.log(record)
+                  setCurUserId(record.id)
+                  setAccountDialogVisible(true)
+                }}>编辑</Button>
               </>
             )}>
           </Table.Column>
         </Table>
+
+        {/* 添加及编辑账号 */}
+        <AccountDialog
+          visible={accountDialogVisible}
+          id={curUserId}
+          onClose={() => {
+            onSearch()
+            setAccountDialogVisible(false)
+          }}>
+        </AccountDialog>
       </Fragment>
     </BaseLayoutContent>
   )
