@@ -9,7 +9,6 @@ import { USER_ROLE } from "@/configs";
 function Project () {
   // 下拉框数据
   const { college: facultyOptions } = useSelector(selectDownList)
-
   // 条件搜索表单
   const [form] = Form.useForm();
   // 表格loading 加载
@@ -19,51 +18,46 @@ function Project () {
   // 表格分页数据
   const [pagination, setPagination] = useState({
     pageSize: 10,
-    pageNum: 1
+    pageNum: 1,
+    total: 0
   })
-  // 总页数
-  const [total, setTotal] = useState(0)
+  // 条件对象
+  const [condition, setCondition] = useState({
+    keywords: '',
+    collegeId: '',
+    departmentId: ''
+  })
   // 当前选择的行
   const [selectedRows, setSelectedRows] = useState([])
 
   // 搜索
-  // const onSearch = useCallback(() => {
-  //   const condition = form.getFieldsValue()
-  //   // setPagination({
-  //   //   ...pagination,
-  //   //   pageNum: 1
-  //   // })
-  //   console.log('condition', condition)
-  //   // 获取数据
-  //   // getTableData(setPagination, condition)
-  // }, [form])
-
   const onSearch = () => {
-    const condition = form.getFieldsValue()
+    const formValues = form.getFieldsValue()
+    console.log('搜索')
     setPagination({
       ...pagination,
       pageNum: 1
     })
-    // 获取数据
-    getTableData(setPagination, condition)
+    setCondition({
+      ...condition,
+      ...formValues
+    })
   }
 
   // 获取表格数据
-  const getTableData = useCallback((pagination) => {
-    const condition = form.getFieldsValue()
-
+  const getTableData = useCallback(() => {
     setLoading(true)
     apis.getAccountList({
       role: USER_ROLE.PROJECT,
-      departmentId: '',
       ...condition,
-      ...pagination
+      pageSize: pagination.pageSize,
+      pageNum: pagination.pageNum
     }).then(res => {
       if (res.data.code === 0) {
         const { currentPage, list, total } = res.data.data
         setTableData(list)
         setPagination({
-          ...pagination,
+          pageSize: pagination.pageSize,
           pageNum: currentPage,
           total: total
         })
@@ -75,35 +69,7 @@ function Project () {
     }).finally(() => {
       setLoading(false)
     })
-  }, [])
-  // const getTableData = (pagination) => {
-  //   const condition = form.getFieldsValue()
-  //   console.log('form condition', condition)
-
-  //   setLoading(true)
-  //   apis.getAccountList({
-  //     role: USER_ROLE.PROJECT,
-  //     departmentId: '',
-  //     ...condition,
-  //     ...pagination
-  //   }).then(res => {
-  //     if (res.data.code === 0) {
-  //       const { currentPage, list, total } = res.data.data
-  //       setTableData(list)
-  //       setPagination({
-  //         ...pagination,
-  //         pageNum: currentPage,
-  //         total: total
-  //       })
-  //     } else {
-  //       message.error(res.data.message)
-  //     }
-  //   }).catch(err => {
-  //     console.log(err)
-  //   }).finally(() => {
-  //     setLoading(false)
-  //   })
-  // }
+  }, [condition, pagination.pageSize, pagination.pageNum])
   
   // 初始化获取数据
   useEffect(() => {
@@ -124,7 +90,8 @@ function Project () {
                 width: '200px'
               }}
               allowClear
-              placeholder="人事号或姓名">
+              placeholder="人事号或姓名"
+              onSearch={onSearch}>
             </Input.Search>
           </Form.Item>
           <Form.Item
@@ -134,7 +101,8 @@ function Project () {
                 width: '120px'
               }}
               placeholder="所属院系"
-              allowClear>
+              allowClear
+              onChange={onSearch}>
               {
                 facultyOptions.map(item => {
                   return (
@@ -179,7 +147,7 @@ function Project () {
           rowKey="id"
           pagination={{
             current: pagination.pageNum,
-            total: total,
+            total: pagination.total,
             showQuickJumper: true,
             onChange: page => setPagination({
               ...pagination,
