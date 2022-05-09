@@ -1,12 +1,16 @@
 import BaseLayoutContent from "@/components/baseLayout/content"
 import { selectDownList } from "@/store/slices/downListSlice";
-import { Form, Input, Select, Button, Table, message } from "antd"
+import { Form, Input, Select, Button, Table, message, Modal } from "antd"
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+
 import { Fragment, useCallback, useEffect, useState } from "react"
 import { useSelector } from "react-redux";
 import * as apis from '@/api'
 import { USER_ROLE } from "@/configs";
 import { downloadFileByA } from "@/utils";
 import AccountDialog from './account-dialog/index'
+import BatchImportBtn from "@/components/batch-import-btn";
+import CheckBatchImport from "./check-batch-import";
 
 function Project () {
   // 添加及编辑账号dialog
@@ -18,7 +22,7 @@ function Project () {
   // 表格loading 加载
   const [loading, setLoading] = useState(false)
   // 表格数据
-  const [tableData, setTableData] = useState([{id:1, username: '赵思'}])
+  const [tableData, setTableData] = useState([])
   // 表格分页数据
   const [pagination, setPagination] = useState({
     pageSize: 10,
@@ -36,17 +40,23 @@ function Project () {
   // 当前需要编辑用户的id
   const [curUserId, setCurUserId] = useState('')
 
+  // 导入loading
+  const [importLoading, setImportLoading] = useState(false)
+  // 导入结果的弹窗
+  const [importDialogVisible, setImportDialogVisible] = useState(false)
+  // 导入的数据
+  const [importData, setImportData] = useState([])
+
   // 搜索
-  const onSearch = () => {
-    const formValues = form.getFieldsValue()
-    console.log('搜索')
+  const onSearch = (key, value = '') => {
+    console.log(key, value)
     setPagination({
       ...pagination,
       pageNum: 1
     })
     setCondition({
       ...condition,
-      ...formValues
+      [key]: value
     })
   }
 
@@ -87,6 +97,91 @@ function Project () {
     const baseUrl = process.env.REACT_APP_API_BASE_URL
     downloadFileByA(baseUrl + 'api/v1/static/download/project_account_tpl', '')
   }
+  // 导入前检查
+  const onBatchImport = (sheetData) => {
+    setImportLoading(true)
+    apis.batchCheckProjectAccount({
+      data: sheetData
+    }).then(res => {
+      if (res.data.code === 0) {
+        setImportData(res.data.data.data)
+        setImportDialogVisible(true)
+      } else {
+        message.error(res.data.message)
+      }
+    }).catch(err => {
+      console.log(err)
+    }).finally(() => {
+      setImportLoading(false)
+    })
+  }
+  // 启用和禁用
+  const onToggleAccount = (id, type) => {
+    const messageTxt = {
+      enable: '确定要启用此账号？',
+      disable: '确定要禁用此账号？'
+    }[type]
+
+    const title = {
+      enable: '启用账号',
+      disable: '禁用账号'
+    }[type]
+
+    Modal.confirm({
+      title: title,
+      icon: <ExclamationCircleOutlined />,
+      content: messageTxt,
+      onOk() {
+        return new Promise((resolve, reject) => {
+          apis.toggleAccountEnable(id, type).then(res => {
+            if (res.data.code === 0) {
+              message.success('操作成功')
+              getTableData()
+            } else {
+              message.error(res.data.message)
+            }
+            resolve()
+          }).catch(err => {
+            console.log(err)
+            reject()
+          })
+        }).catch(() => console.log('Oops errors!'));
+      },
+      onCancel() {},
+    });
+  }
+  // 初始化密码
+  const onResetPassword = () => {
+    if (selectedRows.length <= 0) {
+      message.warning('先选择需要初始化密码的账号')
+      return
+    }
+    console.log('selectedRows', selectedRows)
+
+    Modal.confirm({
+      title: '初始化密码',
+      icon: <ExclamationCircleOutlined />,
+      content: '是否确认要将密码初始化！',
+      onOk() {
+        return new Promise((resolve, reject) => {
+          apis.resetBatchAccountPassword({
+            ids: selectedRows
+          }).then(res => {
+            if (res.data.code === 0) {
+              message.success('操作成功')
+            } else {
+              message.error(res.data.message)
+            }
+            resolve()
+          }).catch(err => {
+            reject()
+            console.log(err)
+          })
+        }).catch(() => console.log('Oops errors!'));
+      },
+      onCancel() {},
+    });
+  }
   
   return (
     <BaseLayoutContent
@@ -103,7 +198,7 @@ function Project () {
               }}
               allowClear
               placeholder="人事号或姓名"
-              onSearch={onSearch}>
+              onSearch={(value) => onSearch('keywords', value)}>
             </Input.Search>
           </Form.Item>
           <Form.Item
@@ -114,7 +209,7 @@ function Project () {
               }}
               placeholder="所属院系"
               allowClear
-              onChange={onSearch}>
+              onChange={(value) => onSearch('collegeId', value)}>
               {
                 facultyOptions.map(item => {
                   return (
@@ -133,7 +228,10 @@ function Project () {
           <Button
             className="tw-mr-[10px]"
             type="primary"
-            onClick={() => setAccountDialogVisible(true)}>
+            onClick={() => {
+              setCurUserId('')
+              setAccountDialogVisible(true)
+            }}>
             新增
           </Button>
           <Button
@@ -141,11 +239,14 @@ function Project () {
             onClick={onDownloadTemplate}>
             下载批量导入模板
           </Button>
+          <BatchImportBtn
+            className="tw-mr-[10px]"
+            header={['username', 'personnelNumber', 'collegeName', 'mobile']}
+            loading={importLoading}
+            onImport={onBatchImport}>
+          </BatchImportBtn>
           <Button
-            className="tw-mr-[10px]">
-            批量导入
-          </Button>
-          <Button>
+            onClick={onResetPassword}>
             初始化密码
           </Button>
         </div>
@@ -196,9 +297,23 @@ function Project () {
             dataIndex="action"
             render={(text, record) => (
               <>
-                <Button type="text" danger>禁用</Button>
+                {
+                  record.enable ?
+                  <Button
+                    type="text"
+                    danger
+                    onClick={() => onToggleAccount(record.id, 'disable')}>
+                    禁用
+                  </Button>
+                  :
+                  <Button
+                    type="text"
+                    danger
+                    onClick={() => onToggleAccount(record.id, 'enable')}>
+                    启用
+                  </Button>
+                }
                 <Button type="text" onClick={() => {
-                  console.log(record)
                   setCurUserId(record.id)
                   setAccountDialogVisible(true)
                 }}>编辑</Button>
@@ -211,11 +326,25 @@ function Project () {
         <AccountDialog
           visible={accountDialogVisible}
           id={curUserId}
+          onSuccess={() => {
+            getTableData()
+          }}
           onClose={() => {
-            onSearch()
             setAccountDialogVisible(false)
           }}>
         </AccountDialog>
+
+        {/* 检查导入的数据 */}
+        <CheckBatchImport
+          data={importData}
+          visible={importDialogVisible}
+          onSuccess={() => {
+            getTableData()
+          }}
+          onClose={() => {
+            setImportDialogVisible(false)
+          }}>
+        </CheckBatchImport>
       </Fragment>
     </BaseLayoutContent>
   )

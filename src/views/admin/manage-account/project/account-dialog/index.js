@@ -10,6 +10,7 @@ function AccountDialog ({
   visible,
   id,
   onClose,
+  onSuccess,
   facultyId
 }) {
   // 确定按钮loading
@@ -33,6 +34,12 @@ function AccountDialog ({
       apis.getAccountInfo(id).then(res => {
         if (res.data.code === 0) {
           const { username, personnelNumber, collegeId, mobile } = res.data.data
+          form.setFieldsValue({
+            username,
+            personnelNumber,
+            collegeId,
+            mobile
+          })
           setUserForm({
             role: userForm.role,
             username,
@@ -40,7 +47,6 @@ function AccountDialog ({
             collegeId,
             mobile
           })
-          console.log('填充')
         } else {
           message.error(res.data.message)
         }
@@ -48,9 +54,9 @@ function AccountDialog ({
         console.log(err)
       })
     }
-  }, [id, isEdit, userForm.role])
+  }, [id, isEdit, form, userForm.role])
 
-  // 取消回调
+  // 关闭弹窗
   const closeDialog = useCallback(() => {
     form.resetFields()
     onClose()
@@ -79,6 +85,7 @@ function AccountDialog ({
       if (res.data.code === 0) {
         message.success('添加账号成功！')
         closeDialog()
+        onSuccess()
       } else {
         message.error(res.data.message)
       }
@@ -87,7 +94,7 @@ function AccountDialog ({
     }).finally(() => {
       setBtnLoading(false)
     })
-  }, [userForm.role, closeDialog])
+  }, [userForm.role, closeDialog, onSuccess])
   // 编辑账号
   const editAccount = useCallback((values) => {
     setBtnLoading(true)
@@ -100,6 +107,7 @@ function AccountDialog ({
       if (res.data.code === 0) {
         message.success('编辑账号成功！')
         closeDialog()
+        onSuccess()
       } else {
         message.error(res.data.message)
       }
@@ -108,12 +116,12 @@ function AccountDialog ({
     }).finally(() => {
       setBtnLoading(false)
     })
-  }, [id, closeDialog])
+  }, [id, closeDialog, onSuccess])
   return (
     <Modal
       title={ isEdit ? '编辑账号' : '新增账号' }
       visible={visible}
-      okText="添加"
+      okText={isEdit ? '保存' : '添加'}
       onOk={onOn}
       onCancel={closeDialog}
       confirmLoading={btnLoading}>
@@ -124,8 +132,7 @@ function AccountDialog ({
         labelCol={{
           span: 4,
           offset: 0
-        }}
-        initialValues={userForm}>
+        }}>
         <Form.Item
           label="姓名"
           name="username"
@@ -135,26 +142,26 @@ function AccountDialog ({
           }]}>
           <Input />
         </Form.Item>
-        {
-          isEdit ?
-          <p>{userForm.personnelNumber}</p>
-          :
-          <Form.Item
-            label="人事号"
-            name="personnelNumber"
-            rules={[
-              {
-                required: true,
-                message: '请输入人事号',
-              },
-              {
-                pattern: /^[0-9a-zA-Z]{8}$/,
-                message: '请输入正确的人事号',
-              },
-            ]}>
+        <Form.Item
+          label="人事号"
+          name="personnelNumber"
+          rules={[
+            {
+              required: true,
+              message: '请输入人事号',
+            },
+            {
+              pattern: /^[0-9a-zA-Z]{8}$/,
+              message: '请输入正确的人事号',
+            },
+          ]}>
+          {
+            isEdit ?
+            <p>{userForm.personnelNumber}</p>
+            :
             <Input maxLength={8} />
-          </Form.Item>
-        }
+          }
+        </Form.Item>
         {
           facultyId ?
           <p>{userForm.personnelNumber}</p>
