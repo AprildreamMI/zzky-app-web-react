@@ -14,7 +14,7 @@ function AccountDialog ({
   // 确定按钮loading
   const [btnLoading, setBtnLoading] = useState(false)
   // 院系下拉列表
-  const { college: facultyOptions } = useSelector(selectDownList)
+  const { department: departmentOptions } = useSelector(selectDownList)
   // 表单
   const [form] = Form.useForm()
 
@@ -33,10 +33,9 @@ function AccountDialog ({
   }
   // 创建账号
   const createAccount = useCallback((values) => {
-    console.log('创建', values)
     setBtnLoading(true)
     apis.createAccount({
-      role: USER_ROLE.FACULTY,
+      role: USER_ROLE.UNIVERSITY,
       ...values
     }).then(res => {
       if (res.data.code === 0) {
@@ -78,15 +77,15 @@ function AccountDialog ({
           <Input />
         </Form.Item>
         <Form.Item
-          label="所属院系"
-          name="collegeId"
+          label="部门"
+          name="departmentId"
           rules={[{
             required: true,
-            message: '请选择所属院系',
+            message: '请选择部门',
           }]}>
-          <Select placeholder="请选择所属院系">
+          <Select placeholder="请选择部门">
             {
-              facultyOptions.map(item => {
+              departmentOptions.map(item => {
                 return (
                   <Select.Option
                     key={item.id}

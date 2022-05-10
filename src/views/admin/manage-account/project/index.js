@@ -308,7 +308,6 @@ function Project () {
                   :
                   <Button
                     type="text"
-                    danger
                     onClick={() => onToggleAccount(record.id, 'enable')}>
                     启用
                   </Button>

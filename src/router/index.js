@@ -70,6 +70,11 @@ const routers = [
               {
                 path: 'faculty',
                 element: createElement(lazy(() => import('../views/admin/manage-account/faculty'))),
+              },
+              // 校级审核人
+              {
+                path: 'university',
+                element: createElement(lazy(() => import('../views/admin/manage-account/university'))),
               }
             ]
           }

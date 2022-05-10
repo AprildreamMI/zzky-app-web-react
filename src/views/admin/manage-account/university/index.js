@@ -1,19 +1,14 @@
 import BaseLayoutContent from "@/components/baseLayout/content"
-import { selectDownList } from "@/store/slices/downListSlice";
-import { Form, Input, Select, Button, Table, message, Modal } from "antd"
+import { Form, Input, Button, Table, message, Modal } from "antd"
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Fragment, useCallback, useEffect, useState } from "react"
-import { useSelector } from "react-redux";
 import * as apis from '@/api'
 import { USER_ROLE } from "@/configs";
-import { downloadFileByA } from "@/utils";
 import AccountDialog from './account-dialog/index'
 
 function University () {
   // 添加及编辑账号dialog
   const [accountDialogVisible, setAccountDialogVisible] = useState(false)
-  // 下拉框数据
-  const { college: facultyOptions } = useSelector(selectDownList)
   // 条件搜索表单
   const [form] = Form.useForm();
   // 表格loading 加载
@@ -29,8 +24,6 @@ function University () {
   // 条件对象
   const [condition, setCondition] = useState({
     keywords: '',
-    collegeId: '',
-    departmentId: ''
   })
   // 当前选择的行
   const [selectedRows, setSelectedRows] = useState([])
@@ -51,7 +44,7 @@ function University () {
   const getTableData = useCallback((page) => {
     setLoading(true)
     apis.getAccountList({
-      role: USER_ROLE.FACULTY,
+      role: USER_ROLE.UNIVERSITY,
       ...condition,
       pageSize: pagination.pageSize,
       pageNum: page
@@ -79,11 +72,6 @@ function University () {
     getTableData(1)
   }, [getTableData])
 
-  // 下载导入模板
-  const onDownloadTemplate = () => {
-    const baseUrl = process.env.REACT_APP_API_BASE_URL
-    downloadFileByA(baseUrl + 'api/v1/static/download/college_account_tpl', '')
-  }
   // 启用和禁用
   const onToggleAccount = (id, type) => {
     const messageTxt = {
@@ -153,7 +141,7 @@ function University () {
   
   return (
     <BaseLayoutContent
-      headerLabel="院系审核人">
+      headerLabel="校级审核人">
       <Fragment>
         <Form
           form={form}
@@ -169,32 +157,6 @@ function University () {
               onSearch={(value) => onSearch('keywords', value)}>
             </Input.Search>
           </Form.Item>
-          <Form.Item
-            name="collegeId">
-            <Select
-              showSearch
-              style={{
-                width: '120px'
-              }}
-              placeholder="所属院系"
-              allowClear
-              filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-              onChange={(value) => onSearch('collegeId', value)}>
-              {
-                facultyOptions.map(item => {
-                  return (
-                    <Select.Option
-                      key={item.id}
-                      value={item.id}>
-                      { item.title }
-                    </Select.Option>
-                  )
-                })
-              }
-            </Select>
-          </Form.Item>
         </Form>
         <div>
           <Button
@@ -204,11 +166,6 @@ function University () {
               setAccountDialogVisible(true)
             }}>
             新增
-          </Button>
-          <Button
-            className="tw-mr-[10px]"
-            onClick={onDownloadTemplate}>
-            下载批量导入模板
           </Button>
           <Button
             onClick={onResetPassword}>
@@ -244,8 +201,8 @@ function University () {
             dataIndex="account">
           </Table.Column>
           <Table.Column
-            title="所属院系"
-            dataIndex="collegeName">
+            title="部门"
+            dataIndex="departmentName">
           </Table.Column>
           <Table.Column
             title="创建时间"
@@ -268,7 +225,6 @@ function University () {
                   :
                   <Button
                     type="text"
-                    danger
                     onClick={() => onToggleAccount(record.id, 'enable')}>
                     启用
                   </Button>
