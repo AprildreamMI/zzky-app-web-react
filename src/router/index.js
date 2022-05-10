@@ -75,7 +75,12 @@ const routers = [
               {
                 path: 'university',
                 element: createElement(lazy(() => import('../views/admin/manage-account/university'))),
-              }
+              },
+              // 专家
+              {
+                path: 'expert',
+                element: createElement(lazy(() => import('../views/admin/manage-account/expert'))),
+              },
             ]
           }
         ]

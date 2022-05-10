@@ -1,50 +1,38 @@
 import { Modal } from "antd"
 import { USER_ROLE } from "@/configs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import * as apis from '@/api'
-import { Form, Input, Select, message } from 'antd'
-import { useSelector } from "react-redux";
-import { selectDownList } from '@/store/slices/downListSlice'
+import { Form, Input, message } from 'antd'
 
 function AccountDialog ({
   visible,
   id,
   onClose,
   onSuccess,
-  facultyId
 }) {
   // 确定按钮loading
   const [btnLoading, setBtnLoading] = useState(false)
-  // 院系下拉列表
-  const { college: facultyOptions } = useSelector(selectDownList)
   // 表单
   const [form] = Form.useForm()
   // 表单值预填充
   const [userForm, setUserForm] = useState({
-    role: USER_ROLE.PROJECT,
     username: '',
-    personnelNumber: '',
-    collegeId: '',
     mobile: ''
   })
+
   // 是否在进行编辑
   const isEdit = !!id
   useEffect(() => {
     if (isEdit) {
       apis.getAccountInfo(id).then(res => {
         if (res.data.code === 0) {
-          const { username, personnelNumber, collegeId, mobile } = res.data.data
+          const { username, mobile } = res.data.data
           form.setFieldsValue({
             username,
-            personnelNumber,
-            collegeId,
             mobile
           })
           setUserForm({
-            role: userForm.role,
             username,
-            personnelNumber,
-            collegeId,
             mobile
           })
         } else {
@@ -54,7 +42,7 @@ function AccountDialog ({
         console.log(err)
       })
     }
-  }, [id, isEdit, form, userForm.role])
+  }, [id, isEdit, form])
 
   // 关闭弹窗
   const closeDialog = useCallback(() => {
@@ -65,7 +53,6 @@ function AccountDialog ({
   const onOn = () => {
     form.validateFields().then(res => {
       if (isEdit) {
-        console.log('编辑', res, res.role)
         editAccount(res)
       } else {
         createAccount(res)
@@ -76,12 +63,11 @@ function AccountDialog ({
   }
   // 创建账号
   const createAccount = useCallback((values) => {
-    console.log('创建', values)
     setBtnLoading(true)
     apis.createAccount({
-      role: userForm.role,
+      role: USER_ROLE.EXPERT,
       ...values,
-      account: values.personnelNumber
+      account: values.mobile
     }).then(res => {
       if (res.data.code === 0) {
         message.success('添加账号成功！')
@@ -95,15 +81,13 @@ function AccountDialog ({
     }).finally(() => {
       setBtnLoading(false)
     })
-  }, [userForm.role, closeDialog, onSuccess])
+  }, [closeDialog, onSuccess])
   // 编辑账号
   const editAccount = useCallback((values) => {
     setBtnLoading(true)
     apis.editAccountInfo(id, {
-      role: userForm.role,
-      username: values.username,
-      collegeId: values.collegeId,
-      mobile: values.mobile
+      role: USER_ROLE.EXPERT,
+      username: values.username
     }).then(res => {
       if (res.data.code === 0) {
         message.success('编辑账号成功！')
@@ -117,7 +101,7 @@ function AccountDialog ({
     }).finally(() => {
       setBtnLoading(false)
     })
-  }, [userForm.role, id, closeDialog, onSuccess])
+  }, [id, closeDialog, onSuccess])
   return (
     <Modal
       title={ isEdit ? '编辑账号' : '新增账号' }
@@ -144,59 +128,23 @@ function AccountDialog ({
           <Input />
         </Form.Item>
         <Form.Item
-          label="人事号"
-          name="personnelNumber"
+          label="手机号"
+          name="mobile"
           rules={[
             {
               required: true,
               message: '请输入人事号',
-            },
-            {
-              pattern: /^[0-9a-zA-Z]{8}$/,
-              message: '请输入正确的人事号',
-            },
+            },{
+              pattern: /^1\d{10}$/,
+              message: '请输入正确的手机号',
+            }
           ]}>
           {
             isEdit ?
-            <p>{userForm.personnelNumber}</p>
+            <p>{userForm.mobile}</p>
             :
-            <Input maxLength={8} />
+            <Input maxLength={11} />
           }
-        </Form.Item>
-        {
-          facultyId ?
-          <p>{userForm.personnelNumber}</p>
-          :
-          <Form.Item
-            label="所属院系"
-            name="collegeId"
-            rules={[{
-              required: true,
-              message: '请选择所属院系',
-            }]}>
-            <Select placeholder="请选择所属院系">
-              {
-                facultyOptions.map(item => {
-                  return (
-                    <Select.Option
-                      key={item.id}
-                      value={item.id}>
-                      { item.title }
-                    </Select.Option>
-                  )
-                })
-              }
-            </Select>
-          </Form.Item>
-        }
-        <Form.Item
-          label="手机号"
-          name="mobile"
-          rules={[{
-            pattern: /^1\d{10}$/,
-            message: '请输入正确的手机号',
-          }]}>
-          <Input />
         </Form.Item>
       </Form>
     </Modal>
