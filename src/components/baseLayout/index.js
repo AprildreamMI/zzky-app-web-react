@@ -4,7 +4,7 @@ import styles from './index.module.scss'
 import Icon1 from '../../assets/images/header-icons/icon1.png'
 import Icon2 from '../../assets/images/header-icons/icon2.png'
 import Icon3 from '../../assets/images/header-icons/icon3.png'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 const cbs = classNames.bind(styles)
 function BaseLayout ({
   hideLeft,
@@ -12,6 +12,8 @@ function BaseLayout ({
   leftHeaderLabel,
   leftNavList
 }) {
+  const navigate = useNavigate()
+
   const location = useLocation()
 
   // 侧边顶部图标
@@ -28,7 +30,7 @@ function BaseLayout ({
   }
   // 跳转
   const linkTo = (path) => {
-    console.log(path)
+    navigate(path)
   }
 
   return (

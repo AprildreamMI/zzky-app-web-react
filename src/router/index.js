@@ -61,10 +61,15 @@ const routers = [
                 index: true,
                 element: <Navigate to="/admin/manage-account/project" replace={true} />
               },
-              // 项目负责人账号管理
+              // 项目负责人
               {
                 path: 'project',
                 element: createElement(lazy(() => import('../views/admin/manage-account/project'))),
+              },
+              // 院系审核人
+              {
+                path: 'faculty',
+                element: createElement(lazy(() => import('../views/admin/manage-account/faculty'))),
               }
             ]
           }
