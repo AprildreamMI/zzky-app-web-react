@@ -81,6 +81,11 @@ const routers = [
                 path: 'expert',
                 element: createElement(lazy(() => import('../views/admin/manage-account/expert'))),
               },
+              // 专家组
+              {
+                path: 'expert-group',
+                element: createElement(lazy(() => import('../views/admin/manage-account/expert-group'))),
+              },
             ]
           }
         ]

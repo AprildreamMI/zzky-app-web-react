@@ -26,7 +26,7 @@ function BaseLayout ({
   // 是否激活侧边
   const isActive = (path) => {
     const pathname = location.pathname
-    return pathname.includes(path)
+    return path === pathname
   }
   // 跳转
   const linkTo = (path) => {
