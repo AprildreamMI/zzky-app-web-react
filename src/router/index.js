@@ -86,6 +86,11 @@ const routers = [
                 path: 'expert-group',
                 element: createElement(lazy(() => import('../views/admin/manage-account/expert-group'))),
               },
+              // 基本信息
+              {
+                path: 'base-info',
+                element: createElement(lazy(() => import('../views/admin/manage-account/base-info'))),
+              },
             ]
           }
         ]
