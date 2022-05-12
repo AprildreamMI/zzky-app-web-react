@@ -1,11 +1,12 @@
 import BaseLayoutContent from "@/components/baseLayout/content"
-import { Button, Col, Form, message, Row, Upload } from "antd"
+import { Button, Col, Form, message, Row } from "antd"
 import { UploadOutlined } from '@ant-design/icons'
 import { Fragment, useEffect, useState } from "react"
 import * as apis from '@/api'
 import MyUpload from "@/components/upload"
 
 function BaseInfo () {
+  const [btnLoading, setBtnLoading] = useState(false)
   // 表单实例
   const [form] = Form.useForm()
   // 信息列表
@@ -15,16 +16,55 @@ function BaseInfo () {
     apis.getBaseInfo().then(async res => {
       if (res.data.code === 0) {
         const list = res.data.data.list
-        console.log('基本信息', list)
+        const values = {}
+        list.forEach(item => {
+          const { id, instructions } = item
+          values[id] = [{
+            ...instructions,
+            name: instructions.originName
+          }]
+        })
+        form.setFieldsValue(values)
+        // 设置列表
         setInfoList(list)
+        // 设置表单
       } else {
         message.error(res.data.message)
       }
     })
-  }, [])
+  }, [form])
+
+  // 保存
+  const onSave = () => {
+    form.validateFields().then(res => {
+
+      let values = {}
+      for (const key in res) {
+        if (Object.hasOwnProperty.call(res, key)) {
+          const file = res[key][0]
+          values[key] = file
+        }
+      }
+      setBtnLoading(true)
+      apis.editBaseInfo(values).then(res => {
+        if (res.data.code === 0) {
+          message.success('信息已保存成功 !')
+        } else {
+          message.error(res.data.message)
+        }
+      }).catch(err => {
+        console.log(err)
+      }).finally(() => {
+        setBtnLoading(false)
+      })
+    }).catch(error =>{
+      console.log(error)
+    })
+  }
   return (
     <BaseLayoutContent
-      headerLabel="信息维护">
+      headerLabel="信息维护"
+      hideFooter={false}>
       <Fragment></Fragment>
       <Fragment>
         <Row className="tw-leading-[32px] tw-mb-[20px]">
@@ -48,14 +88,14 @@ function BaseInfo () {
                   label={item.title}
                   rules={[{
                     required: true,
-                    message: '请输入组名'
+                    message: `请上传${item.title}`
                   }]}>
                   <MyUpload
                     customProps={{
                       maxSize: 10
                     }}
                     uploadProps={{
-                      accept: '.jpg',
+                      accept: '.doc, .docx',
                       maxCount: 1
                     }}>
                     <Button
@@ -68,6 +108,14 @@ function BaseInfo () {
             })
           }
         </Form>
+      </Fragment>
+      <Fragment>
+        <Button
+          loading={btnLoading}
+          type="primary"
+          onClick={onSave}>
+          保存
+        </Button>
       </Fragment>
     </BaseLayoutContent>
   )
