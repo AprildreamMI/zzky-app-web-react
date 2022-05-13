@@ -12,6 +12,10 @@ function IndexElement () {
     case USER_ROLE.ADMIN:
       toPath = '/admin';
       break;
+    case USER_ROLE.PROJECT:
+      toPath = '/project';
+      console.log(toPath)
+      break;
     default:
       toPath = '/login';
   }
@@ -90,6 +94,35 @@ const routers = [
               {
                 path: 'base-info',
                 element: createElement(lazy(() => import('../views/admin/manage-account/base-info'))),
+              },
+            ]
+          }
+        ]
+      },
+      // 项目负责人
+      {
+        path: 'project',
+        element: createElement(lazy(() => import('../views/project'))),
+        children: [
+          // 默认跳转项目申报管理
+          {
+            index: true,
+            element: <Navigate to="/project/manage-application" replace={true} />
+          },
+          // 项目股那里
+          {
+            path: 'manage-application',
+            element: createElement(lazy(() => import('../views/project/manage-application'))),
+            children: [
+              // 默认跳转所有申报
+              {
+                index: true,
+                element: <Navigate to="/project/manage-application/all" replace={true} />
+              },
+              // 所有申报
+              {
+                path: 'all',
+                element: createElement(lazy(() => import('../views/project/manage-application/all'))),
               },
             ]
           }
