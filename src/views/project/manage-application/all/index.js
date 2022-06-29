@@ -1,6 +1,6 @@
 import BaseLayoutContent from "@/components/baseLayout/content"
 import { selectDownList } from "@/store/slices/downListSlice";
-import { Form, Input, Select, Button, Table, message, Modal } from "antd"
+import { Form, Select, Button, Table, message, Modal } from "antd"
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 import { Fragment, useCallback, useEffect, useState } from "react"

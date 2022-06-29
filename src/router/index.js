@@ -7,6 +7,7 @@ import { Navigate } from 'react-router-dom'
 // 首页默认路由
 function IndexElement () {
   const userRole = useSelector(selectUserRole)
+  console.log('userRole', userRole)
   let toPath = ''
   switch (userRole) {
     case USER_ROLE.ADMIN:
@@ -24,6 +25,15 @@ function IndexElement () {
   )
 }
 
+// 登录验证
+function AuthElement () {
+  const token = localStorage.getItem('token')
+  const LayoutElement = createElement(lazy(() => import('../components/layout')))
+  const NavigateLogin = <Navigate to="/login" replace={true} />
+
+  return token ? LayoutElement : NavigateLogin
+}
+
 const routers = [
   {
     path: '/login',
@@ -31,13 +41,7 @@ const routers = [
   },
   {
     path: '/',
-    element: (() => {
-      const token = localStorage.getItem('token')
-      if (token) {
-        return createElement(lazy(() => import('../components/layout')))
-      }
-      return <Navigate to="/login" replace={true} />
-    })(),
+    element: <AuthElement />,
     children: [
       // 默认路由 线索路由不能拥有子路由
       // 所以不能在拥有子路由的路由上通过判断index来决定是否是首页

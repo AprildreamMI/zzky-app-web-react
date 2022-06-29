@@ -1,5 +1,5 @@
 import { Form, Input, Button, Checkbox, message } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SHA256 } from 'crypto-js'
 import { Base64 } from 'js-base64'
 
@@ -18,8 +18,13 @@ function Login () {
   const dispatch = useDispatch()
   // 按钮loading
   const [btnLoading, setBtnLoading] = useState(false)
+  // 登录表单
+  const [loginForm] = Form.useForm()
   // 读取缓存的表单值
-  const form = useForm()
+  const formData = useForm()
+  useEffect(() => {
+    loginForm.setFieldsValue(formData)
+  }, [loginForm, formData])
 
   // 表单完成提交
   const onFinish = (values) => {
@@ -94,11 +99,9 @@ function Login () {
           </div>
 
           <Form
+            form={loginForm}
             size='large'
             name='loginForm'
-            initialValues={{
-              ...form
-            }}
             onFinish={onFinish}>
             <Form.Item
               name="account"
