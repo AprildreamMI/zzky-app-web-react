@@ -28,7 +28,10 @@ function IndexElement () {
 // 登录验证
 function AuthElement () {
   const token = localStorage.getItem('token')
+  const Com = lazy(() => import('../components/layout'))
+  console.log('com', Com)
   const LayoutElement = createElement(lazy(() => import('../components/layout')))
+  console.log('LayoutElement', LayoutElement)
   const NavigateLogin = <Navigate to="/login" replace={true} />
 
   return token ? LayoutElement : NavigateLogin

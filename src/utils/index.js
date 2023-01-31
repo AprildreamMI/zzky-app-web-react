@@ -175,3 +175,14 @@ export const getYearScopeOptions = (start = '2021-1-1', count = 1) => {
   }
   return options
 }
+
+/**
+ * 序号方法
+ * @param {*} index 
+ * @param {*} pageNum 
+ * @param {*} pageSize 
+ * @returns 
+ */
+export const indexMethod = (index, pageNum, pageSize) => {
+  return (pageNum - 1) * pageSize + index + 1
+}

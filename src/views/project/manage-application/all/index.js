@@ -1,19 +1,13 @@
 import BaseLayoutContent from "@/components/baseLayout/content"
-import { selectDownList } from "@/store/slices/downListSlice";
-import { Form, Select, Button, Table, message, Modal } from "antd"
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Button, Table, message, Tag } from "antd"
 
 import { Fragment, useCallback, useEffect, useState } from "react"
-import { useSelector } from "react-redux";
 import * as apis from '@/api'
-import { USER_ROLE } from "@/configs";
-import { downloadFileByA } from "@/utils";
+import { PROJECT_AUDIT_STATUS_OPTIONS, PROJECT_STATUS, PROJECT_STATUS_OPTIONS } from "@/configs";
+import CommonSearch from "@/components/common-list/CommonSearch";
+import { indexMethod } from "@/utils";
 
 function Project () {
-  // 下拉框数据
-  const { college: facultyOptions } = useSelector(selectDownList)
-  // 条件搜索表单
-  const [form] = Form.useForm();
   // 表格loading 加载
   const [loading, setLoading] = useState(false)
   // 表格数据
@@ -26,16 +20,10 @@ function Project () {
   })
   // 条件对象
   const [condition, setCondition] = useState({
-    keywords: '',
-    collegeId: '',
-    departmentId: ''
+    year: '' // 申请年度
   })
-  // 当前选择的行
-  const [selectedRows, setSelectedRows] = useState([])
-
   // 搜索
   const onSearch = (key, value = '') => {
-    console.log(key, value)
     setPagination({
       ...pagination,
       pageNum: 1
@@ -47,13 +35,12 @@ function Project () {
   }
 
   // 获取表格数据
-  const getTableData = useCallback(() => {
+  const getTableData = useCallback((page) => {
     setLoading(true)
-    apis.getAccountList({
-      role: USER_ROLE.PROJECT,
+    apis.getMyApplicationList({
       ...condition,
-      pageSize: pagination.pageSize,
-      pageNum: pagination.pageNum
+      pageNum: page,
+      pageSize: pagination.pageSize
     }).then(res => {
       if (res.data.code === 0) {
         const { currentPage, list, total } = res.data.data
@@ -71,198 +58,163 @@ function Project () {
     }).finally(() => {
       setLoading(false)
     })
-  }, [condition, pagination.pageSize, pagination.pageNum])
+  }, [condition, pagination.pageSize])
   
   // 初始化获取数据
   useEffect(() => {
-    getTableData()
+    getTableData(1)
   }, [getTableData])
 
-  // 下载导入模板
-  const onDownloadTemplate = () => {
-    const baseUrl = process.env.REACT_APP_API_BASE_URL
-    downloadFileByA(baseUrl + 'api/v1/static/download/project_account_tpl', '')
-  }
-  // 启用和禁用
-  const onToggleAccount = (id, type) => {
-    const messageTxt = {
-      enable: '确定要启用此账号？',
-      disable: '确定要禁用此账号？'
-    }[type]
+  /**
+   * 获取审核状态
+   * @param {*} status 
+   * @param {*} prop 
+   * @returns 
+   */
+  const getAuditStatus = useCallback((status, prop = 'label') => {
+    const item = PROJECT_AUDIT_STATUS_OPTIONS.find(item => item.value === status)
+    return item ? item[prop] : ''
+  }, [])
 
-    const title = {
-      enable: '启用账号',
-      disable: '禁用账号'
-    }[type]
+  /**
+   * 获取项目状态
+   * @param {*} status 
+   * @param {*} prop 
+   * @returns 
+   */
+  const getProjectStatus = useCallback((status, prop = 'label') => {
+    const item = PROJECT_STATUS_OPTIONS.find(item => item.value === status)
+    return item ? item[prop] : ''
+  }, [])
 
-    Modal.confirm({
-      title: title,
-      icon: <ExclamationCircleOutlined />,
-      content: messageTxt,
-      onOk() {
-        return new Promise((resolve, reject) => {
-          apis.toggleAccountEnable(id, type).then(res => {
-            if (res.data.code === 0) {
-              message.success('操作成功')
-              getTableData()
-            } else {
-              message.error(res.data.message)
-            }
-            resolve()
-          }).catch(err => {
-            console.log(err)
-            reject()
-          })
-        }).catch(() => console.log('Oops errors!'));
-      },
-      onCancel() {},
-    });
-  }
-  // 初始化密码
-  const onResetPassword = () => {
-    if (selectedRows.length <= 0) {
-      message.warning('先选择需要初始化密码的账号')
-      return
-    }
-    console.log('selectedRows', selectedRows)
-
-    Modal.confirm({
-      title: '初始化密码',
-      icon: <ExclamationCircleOutlined />,
-      content: '是否确认要将密码初始化！',
-      onOk() {
-        return new Promise((resolve, reject) => {
-          apis.resetBatchAccountPassword({
-            ids: selectedRows
-          }).then(res => {
-            if (res.data.code === 0) {
-              message.success('操作成功')
-            } else {
-              message.error(res.data.message)
-            }
-            resolve()
-          }).catch(err => {
-            reject()
-            console.log(err)
-          })
-        }).catch(() => console.log('Oops errors!'));
-      },
-      onCancel() {},
-    });
-  }
+  /**
+   * 是否可以变价
+   * @param {*} status 
+   * @returns 
+   */
+  const canEdit = useCallback((status) => {
+    return status === PROJECT_STATUS.NOT_SUBMITTED || status === PROJECT_STATUS.RETURNED_FACULTY || status === PROJECT_STATUS.RETURNED_UNIVERSITY
+  }, [])
   
   return (
     <BaseLayoutContent
-      headerLabel="项目负责人">
+      headerLabel="全部申报">
       <Fragment>
-        <Form
-          form={form}
-          layout="inline">
-          <Form.Item
-            name="collegeId">
-            <Select
-              style={{
-                width: '120px'
-              }}
-              placeholder="所属院系"
-              allowClear
-              onChange={(value) => onSearch('collegeId', value)}>
-              {
-                facultyOptions.map(item => {
-                  return (
-                    <Select.Option
-                      key={item.id}
-                      value={item.id}>
-                      { item.title }
-                    </Select.Option>
-                  )
-                })
-              }
-            </Select>
-          </Form.Item>
-        </Form>
+        <CommonSearch
+          propList={[
+            {
+              propName: 'year',
+              isRequired: false,
+              placeholder: '请选择申请年度'
+            }
+          ]}
+          onChange={onSearch}>
+        </CommonSearch>
         <div>
           <Button
             className="tw-mr-[10px]"
             type="primary"
             onClick={() => {
+
             }}>
             新增
-          </Button>
-          <Button
-            className="tw-mr-[10px]"
-            onClick={onDownloadTemplate}>
-            下载批量导入模板
-          </Button>
-          <Button
-            onClick={onResetPassword}>
-            初始化密码
           </Button>
         </div>
       </Fragment>
       <Fragment>
         <Table
           loading={loading}
-          rowSelection={{
-            onChange: rowKeys => setSelectedRows(rowKeys)
-          }}
           className="tw-mt-[20px]"
           dataSource={tableData}
           rowKey="id"
+          bordered
           pagination={{
             current: pagination.pageNum,
             total: pagination.total,
             showQuickJumper: true,
-            onChange: page => setPagination({
-              ...pagination,
-              pageNum: page
-            }),
+            onChange:  page => {
+              setPagination({
+                ...pagination,
+                pageNum: page
+              })
+              getTableData(page)
+            },
             showTotal: total => `共 ${total} 条`,
             position: ['none', 'bottomCenter']
           }}>
           <Table.Column
-            title="姓名"
-            dataIndex="username">
+            width="70px"
+            title="序号"
+            dataIndex="index"
+            render={(text, record, index) => {
+              return indexMethod(index, pagination.pageNum, pagination.pageSize)
+            }}>
           </Table.Column>
           <Table.Column
-            title="人事号"
-            dataIndex="personnelNumber">
+            title="项目名称"
+            dataIndex="title">
           </Table.Column>
           <Table.Column
-            title="所属院系"
-            dataIndex="collegeName">
+            title="项目类型"
+            dataIndex="projectClassName">
           </Table.Column>
           <Table.Column
-            title="手机号"
-            dataIndex="mobile">
+            title="申请年度"
+            dataIndex="year">
+          </Table.Column>
+          <Table.Column
+            title="审核状态"
+            dataIndex="status"
+            render={(text, record) => (
+              <>
+                { getAuditStatus(record.status, 'label') && 
+                  <Tag
+                    color={getAuditStatus(record.status, 'type')}>
+                    { getAuditStatus(record.status, 'label') }
+                  </Tag>
+                }
+              </>
+            )}>
+          </Table.Column>
+          <Table.Column
+            title="项目状态"
+            dataIndex="status"
+            render={(text, record) => (
+              <>
+                {
+                  getProjectStatus(record.status, 'label') &&
+                  <Tag
+                    color={getProjectStatus(record.status, 'type')}>
+                    { getProjectStatus(record.status, 'label') }
+                  </Tag>
+                }
+              </>
+            )}>
           </Table.Column>
           <Table.Column
             title="创建时间"
             dataIndex="createdAt">
           </Table.Column>
           <Table.Column
-            width="160px"
+            width="60px"
             title="操作"
             dataIndex="action"
             render={(text, record) => (
               <>
                 {
-                  record.enable ?
+                  canEdit(record.status) ?
                   <Button
-                    type="text"
-                    danger
-                    onClick={() => onToggleAccount(record.id, 'disable')}>
-                    禁用
-                  </Button>
+                    type="link"
+                    onClick={() => {
+
+                  }}>编辑</Button>
                   :
                   <Button
-                    type="text"
-                    onClick={() => onToggleAccount(record.id, 'enable')}>
-                    启用
-                  </Button>
+                    type="link"
+                    onClick={() => {
+  
+                  }}>查看</Button>
                 }
-                <Button type="text" onClick={() => {
-                }}>编辑</Button>
               </>
             )}>
           </Table.Column>

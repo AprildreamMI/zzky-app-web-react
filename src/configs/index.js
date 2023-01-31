@@ -81,7 +81,7 @@ const PROJECT_AUDIT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: PROJECT_STATUS.RETURNED_FACULTY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '待校级审核',
@@ -91,7 +91,7 @@ const PROJECT_AUDIT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: PROJECT_STATUS.RETURNED_UNIVERSITY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '已接收',
@@ -112,7 +112,7 @@ const PROJECT_STATUS_OPTIONS = [
   {
     label: '未获批',
     value: PROJECT_STATUS.NOT_CONFIRMED,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '已获批',
@@ -172,7 +172,7 @@ const ASSIGNMENT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: ASSIGNMENT_STATUS.RETURNED_FACULTY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '待校级审核',
@@ -182,7 +182,7 @@ const ASSIGNMENT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: ASSIGNMENT_STATUS.RETURNED_UNIVERSITY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '已接收',
@@ -242,7 +242,7 @@ const PROGRESS_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: PROGRESS_STATUS.RETURNED_FACULTY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '待校级审核',
@@ -252,7 +252,7 @@ const PROGRESS_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: PROGRESS_STATUS.RETURNED_UNIVERSITY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '已接收',
@@ -333,7 +333,7 @@ const SUMMARY_AUDIT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: SUMMARY_STATUS.RETURNED_FACULTY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '待校级审核',
@@ -343,7 +343,7 @@ const SUMMARY_AUDIT_STATUS_OPTIONS = [
   {
     label: '已退回',
     value: SUMMARY_STATUS.RETURNED_UNIVERSITY,
-    type: 'danger'
+    type: 'error'
   },
   {
     label: '已接收',

@@ -1,5 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as apis from '@/api'
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration'
+import { getYearScopeOptions } from '@/utils';
+dayjs.extend(duration)
 
 const downListSlice = createSlice({
   name: 'downList',
@@ -67,6 +71,17 @@ export const selectDownList = (state) => {
     ...data,
     ...data.allDownList
   }
+}
+
+/**
+ * 2020年开始，默认往后加3年到2023年，每过一年加一年
+ * @returns list
+ */
+export const selectYearOptions = () => {
+  const start = '2020-1-1'
+  const years = dayjs.duration(dayjs().diff(dayjs(start))).years()
+  const options = getYearScopeOptions(start, 3 + years)
+  return options
 }
 
 
